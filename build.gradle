@@ -15,7 +15,7 @@ allprojects {
     version = '0.0.3.0'
     ext {
         appName = 'Project-SimBuild'
-        gdxVersion = '1.2.0'
+        gdxVersion = '1.2.1-SNAPSHOT'
         roboVMVersion = '0.0.13'
     }
 
