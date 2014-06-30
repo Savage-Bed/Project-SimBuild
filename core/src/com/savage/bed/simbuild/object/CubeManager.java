@@ -163,8 +163,9 @@ public final class CubeManager
 	
 	public static void setStatic(Texture tex)
 	{
-		texture = tex;
-		staticMaterial = new Material(new BlendingAttribute(), TextureAttribute.createDiffuse(texture));
+		texture = tex;		
+		staticMaterial = new Material(TextureAttribute.createDiffuse(texture));
+		
 		bl.setCol(null);
 		br.setCol(null);
 		tl.setCol(null);
