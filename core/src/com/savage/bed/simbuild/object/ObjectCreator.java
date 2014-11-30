@@ -93,4 +93,69 @@ public class ObjectCreator
 		}
 		chunk.addAllRel(toAdd);
 	}
+	
+	public static Array<Cube> genChunkTerrain(int x, int z, int minHeight, int maxHeight, int octave, Random random, ChunkManager manager)
+	{
+		Array<Cube> toReturn = new Array<Cube>();
+		
+		float[][] baseNoise = NoiseGenerator.generateWhiteNoise(Chunk.CHUNK_XZ, Chunk.CHUNK_XZ, random);
+		
+		Chunk neighbor = manager.getChunk(x, z + 1);
+		if(!(neighbor == null))
+		{
+			for(int w = 0; w < Chunk.CHUNK_XZ; w++)
+			{
+				baseNoise[w][Chunk.CHUNK_XZ - 1] = (float) neighbor.getHeightRel(w, 0) / (float) maxHeight;
+			}
+		}
+		
+		neighbor = manager.getChunk(x, z - 1);
+		
+		if(!(neighbor == null))
+			{
+			for(int w = 0; w < Chunk.CHUNK_XZ; w++)
+			{
+				baseNoise[w][0] = (float) neighbor.getHeightRel(w, Chunk.CHUNK_XZ - 1) / (float) maxHeight;
+			}
+		}
+		
+		neighbor = manager.getChunk(x + 1, z);
+		
+		if(!(neighbor == null))
+		{
+			for(int u = 0; u < Chunk.CHUNK_XZ; u++)
+			{
+				baseNoise[Chunk.CHUNK_XZ - 1][u] = ((float) neighbor.getHeightRel(0, u)) / (float) maxHeight;
+			}
+		}
+		
+		neighbor = manager.getChunk(x - 1, z);
+		
+		if(!(neighbor == null))
+		{
+			for(int u= 0; u < Chunk.CHUNK_XZ; u++)
+			{
+				baseNoise[0][u] = (float) neighbor.getHeightRel(Chunk.CHUNK_XZ - 1, u) / (float) maxHeight;
+			}
+		}
+		
+		int scalar = maxHeight - minHeight;
+		float[][] perlinNoise = NoiseGenerator.generatePerlinNoise(baseNoise, octave, scalar, minHeight);
+		
+		int noise;
+		
+		for(u = 0; u < Chunk.CHUNK_XZ; u++)
+		{
+			for(w = 0; w < Chunk.CHUNK_XZ; w++)
+			{
+				noise = Math.round(perlinNoise[u][w]);
+				toReturn.add(CubeManager.newCube("grass", u, noise, w));
+				
+				for(v = noise - 1; v > noise - 5 && v >= 0; v--)
+					toReturn.add(CubeManager.newCube("dirt", u, v, w));
+			}
+		}
+		
+		return toReturn;
+	}
 }

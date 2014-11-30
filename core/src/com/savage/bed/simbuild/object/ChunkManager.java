@@ -63,6 +63,11 @@ public class ChunkManager
 		return getChunkAbs(x, z).getCubeFastAbs(x, y, z);
 	}
 	
+	public boolean hasCubeAbs(int x, int y, int z)
+	{
+		return getCubeFastAbs(x, y, z) != null;
+	}
+	
 	public void addAllCubesAbs(Array<Cube> cubes)
 	{
 		for(Cube cube : cubes)
@@ -83,7 +88,7 @@ public class ChunkManager
 				else
 				{
 					Chunk c = allocateChunk(u, w);
-					c.addAllFastRel(ObjectCreator.genPerlinIsland(0, 0, 0, 16, 5, 25, 16, 5, random));
+					c.addAllFastRel(ObjectCreator.genChunkTerrain(u, w, 5, 16, 4, random, this));
 					near.add(c);
 				}
 			}

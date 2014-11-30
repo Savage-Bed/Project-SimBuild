@@ -1,6 +1,7 @@
 package com.savage.bed.simbuild.screen;
 
 import java.util.Random;
+
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
@@ -140,11 +141,11 @@ public class MainScreen extends SavageScreen
 		
 		chunkManager.getNearby(pCX, pCZ, 6, chunks, random);
 		
-		if(updateLightChunks)
+		/*if(updateLightChunks)
 		{
 			lightChunks.clear();
 			lightChunks.addAll(chunks);
-		}
+		}*/
 		
 		draw(delta);
 		
@@ -510,11 +511,10 @@ public class MainScreen extends SavageScreen
 	private void generateWorld()
 	{
 		int i, t;
-		Array<Cube> cubes = ObjectCreator.genPerlinIsland(-14 * Chunk.CHUNK_XZ, 0, -14 * Chunk.CHUNK_XZ, 30 * Chunk.CHUNK_XZ, 5, 16, 30 * Chunk.CHUNK_XZ, 5, random);
-		cubes.addAll(ObjectCreator.genIsland(-20, 32, -20, 40, 4, 40, "grass", "stone"));
+		Array<Cube> cubes = ObjectCreator.genPerlinIsland(-7 * Chunk.CHUNK_XZ, 0, -7 * Chunk.CHUNK_XZ, 15 * Chunk.CHUNK_XZ, 5, 16, 15 * Chunk.CHUNK_XZ, 4, random);
 		chunkManager.allocateChunks(-14, -14, 15, 15);
 		chunkManager.addAllCubesAbs(cubes);
-		for(i = -10; i <= 10; i++)
+		for(i = -7; i <= 7; i++)
 		{
 			for(t = -7; t <= 7; t++)
 			{
@@ -522,14 +522,11 @@ public class MainScreen extends SavageScreen
 				ObjectCreator.generateRandomTrees(c, random);
 			}
 		}
-		
-		//lights.put(tmpV2.set(pCX, pCZ), new Light(Light.MAXLIGHT, 0, 38, 0));
 	}
 	
 	@Override
 	public void hide()
 	{
-		//renderer.stop();
 		inventory.dispose();
 		mBatch.dispose();
 		manager.dispose();

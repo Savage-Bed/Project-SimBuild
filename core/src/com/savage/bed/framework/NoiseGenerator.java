@@ -18,7 +18,21 @@ public class NoiseGenerator
 	 
 	    return noise;
 	}
-
+	
+	public static float[][] generateScaledWhiteNoise(int width, int height, float scalar, Random random)
+	{
+	    float[][] noise = new float[width][height];
+	 
+	    for (int i = 0; i < width; i++)
+	    {
+	        for (int j = 0; j < height; j++)
+	        {
+	            noise[i][j] = ((float)random.nextFloat() % 1) * scalar;
+	        }
+	    }
+	 
+	    return noise;
+	}
 	
 	public static float[][] generateSmoothNoise(float[][] baseNoise, int octave)
 	{

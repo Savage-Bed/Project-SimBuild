@@ -154,7 +154,7 @@ public final class CubeManager
 		}
 	}
 	
-	public static int MAXLIGHT = 15;
+	public static int MAXLIGHT = 16;
 	public static Material staticMaterial;
 	private static Texture texture;
 	public static HashMap<String, CubeType> types = new HashMap<String, CubeType>();
@@ -166,10 +166,10 @@ public final class CubeManager
 		texture = tex;		
 		staticMaterial = new Material(TextureAttribute.createDiffuse(texture));
 		
-		bl.setCol(null);
-		br.setCol(null);
-		tl.setCol(null);
-		tr.setCol(null);
+		bl.setCol(1, 1, 1, 1);
+		br.setCol(1, 1, 1, 1);
+		tl.setCol(1, 1, 1, 1);
+		tr.setCol(1, 1, 1, 1);
 	}
 	
 	public static Cube newCube(CubeType type, int x, int y, int z)
@@ -222,8 +222,8 @@ public final class CubeManager
 		tl.setCol(ll, ll, ll, 1);
 		tr.setCol(ll, ll, ll, 1);
 		
-		//if(cube.lightSource == null)
-			//cube.lightLevel = 0;
+		if(cube.lightSource == null)
+			cube.lightLevel = 0;
 		
 		for(CubeTextureData data : datas)
 		{

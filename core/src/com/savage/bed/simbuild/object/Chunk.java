@@ -76,9 +76,9 @@ public class Chunk
 		cube.setPosition(u + x, v, w + z);
 		cubes[u][v][w] = cube;
 		if(cube.isLight)
-			calculateLightSource(cube);
+			calculateLightRecursiveSource(cube);
 		else
-			lightNewCube(cube);
+			lightNewCubeRecursive(cube);
 		
 		modelInvalid = true;
 	}
@@ -93,9 +93,9 @@ public class Chunk
 			cube.setPosition(u + x, v, w + z);
 			cubes[u][v][w] = cube;
 			if(cube.isLight)
-				calculateLightSource(cube);
+				calculateLightRecursiveSource(cube);
 			else
-				lightNewCube(cube);
+				lightNewCubeRecursive(cube);
 			
 			modelInvalid = true;
 		}
@@ -121,9 +121,9 @@ public class Chunk
 		
 		cubes[u - x][v][w - z] = cube;
 		if(cube.isLight)
-			calculateLightSource(cube);
+			calculateLightRecursiveSource(cube);
 		else
-			lightNewCube(cube);
+			lightNewCubeRecursive(cube);
 		
 		modelInvalid = true;
 	}
@@ -137,9 +137,9 @@ public class Chunk
 		{
 			cubes[u][v][w] = cube;
 			if(cube.isLight)
-				calculateLightSource(cube);
+				calculateLightRecursiveSource(cube);
 			else
-				lightNewCube(cube);
+				lightNewCubeRecursive(cube);
 			
 			modelInvalid = true;
 		}
@@ -164,7 +164,7 @@ public class Chunk
 		if(cube.isLight)
 			calculateRemoveLightSource(cube);
 		else if(cube.lightSource != null)
-			calculateLightSource(cube.lightSource);
+			calculateLightRecursiveSource(cube.lightSource);
 		
 		modelInvalid = true;
 	}
@@ -176,7 +176,7 @@ public class Chunk
 		if(cube.isLight)
 			calculateRemoveLightSource(cube);
 		else if(cube.lightSource != null)
-			calculateLightSource(cube.lightSource);
+			calculateLightRecursiveSource(cube.lightSource);
 		modelInvalid = true;
 	}
 	
@@ -283,7 +283,7 @@ public class Chunk
 						}
 						
 						CubeManager.genCube(cubes[u][v][w], meBuild, ignore);
-						//if(cubes[u][v][w].lightSource == null)
+						//if(cubes[u][v][w].lightSource == sunlight)
 							//cubes[u][v][w].lightLevel = 0;
 					}
 				}
@@ -305,29 +305,36 @@ public class Chunk
 		{
 			for(w = 0; w < CHUNK_XZ; w++)
 			{
-				calculateSunlightPoint(u + x, getHeightRel(u, w), w + z);
+				calcSunlightPoint(u + x, getHeightRel(u, w), w + z, 10);
 			}
 		}
 	}
 	
-	private void calculateSunlightPoint(int x, int y, int z)
+	private void calcSunlightPoint(int x, int y, int z, int lightLevel)
 	{
-		int xl, yl, zl;
-		
-		int ll = 4;
-		
-		for(xl = -ll; xl <= ll; xl++)
+		Cube cube = (inBoundsAbs(x, y, z) ? this.getCubeAbs(x, y, z) : parent.getCubeAbs(x, y, z));
+		if(cube != null)
 		{
-			for(yl = -8; yl <= 2; yl++)
+			if(!cube.isLight && lightLevel > cube.lightLevel)
 			{
-				for(zl = -ll; zl <= ll; zl++)
-				{
-					calculateLightPoint(x + xl, y + yl, z + zl, CubeManager.MAXLIGHT - ((Math.abs(xl) + Math.abs(yl) + Math.abs(zl)) * 2), null);
-				}
+				cube.lightSource = sunlight;
+				cube.lightLevel = lightLevel;
+			}
+			
+			if(lightLevel - 1 > 0)
+			{
+				lightLevel--;
+				calcSunlightPoint(x - 1, y, z, lightLevel);
+				calcSunlightPoint(x + 1, y, z, lightLevel);
+				calcSunlightPoint(x, y - 1, z, lightLevel);
+				calcSunlightPoint(x, y + 1, z, lightLevel);
+				calcSunlightPoint(x, y, z - 1, lightLevel);
+				calcSunlightPoint(x, y, z + 1, lightLevel);
 			}
 		}
 	}
 	
+	@Deprecated
 	private void lightNewCube(Cube toLight)
 	{
 		Array<Cube> toRecalc = new Array<Cube>();
@@ -355,6 +362,35 @@ public class Chunk
 		}
 	}
 	
+	private void lightNewCubeRecursive(Cube toLight)
+	{
+		Array<Cube> toRecalc = new Array<Cube>();
+		
+		int x = toLight.x(), y = toLight.y(), z = toLight.z();
+		int xl, yl, zl;
+		
+		for(xl = -1; xl <= 1; xl++)
+		{
+			for(yl = -1; yl <= 1; yl++)
+			{
+				for(zl = -1; zl <= 1; zl++)
+				{
+					Cube cube = parent.getCubeAbs(x + xl, y + yl, z + zl);
+					if(cube != null && cube.lightLevel > 1 && cube.lightSource != null && cube.lightSource != sunlight && !toRecalc.contains(cube.lightSource, true))
+						toRecalc.add(cube.lightSource);
+				}
+			}
+		}
+		
+		for(Cube light : toRecalc)
+		{
+				Chunk chunk = parent.getChunk(light.x(), light.z());
+				//(chunk == null ? this : chunk).calculateRemoveLightSource(light);
+				(chunk == null ? this : chunk).calculateLightRecursiveSource(light);
+		}
+	}
+	
+	@Deprecated
 	private void calculateLightSource(Cube source)
 	{
 		if(source == sunlight)
@@ -376,6 +412,7 @@ public class Chunk
 		}
 	}
 	
+	@Deprecated
 	private void calculateLightPoint(int x, int y, int z, int lightLevel, Cube source)
 	{
 		Chunk chunk = (inBoundsAbs(x, y, z) ? this : parent.getChunkAbs(x, z));
@@ -388,6 +425,41 @@ public class Chunk
 				cube.lightSource = source;
 				chunk.modelInvalid = true;
 			}
+		}
+	}
+	
+	private void calculateLightRecursiveSource(Cube source)
+	{
+		if(source == sunlight)
+			return;
+		
+		int x = source.x(), y = source.y(), z = source.z();
+		
+		calculateLightRecursivePoint(x, y, z, source.lightLevel + 1, source);
+	}
+	
+	private void calculateLightRecursivePoint(int x, int y, int z, int lightLevel, Cube source)
+	{
+		Chunk chunk = (inBoundsAbs(x, y, z) ? this : parent.getChunkAbs(x, z));
+		Cube cube = chunk.getCubeAbs(x, y, z);
+		if(cube != null && cube != source)
+		{
+			if(!cube.isLight && cube.lightLevel < lightLevel)
+			{
+				cube.lightLevel = lightLevel;
+				cube.lightSource = source;
+				chunk.modelInvalid = true;
+			}
+		}
+		else if(lightLevel - 1 > 0)
+		{
+			lightLevel--;
+			calculateLightRecursivePoint(x - 1, y, z, lightLevel, source);
+			calculateLightRecursivePoint(x + 1, y, z, lightLevel, source);
+			calculateLightRecursivePoint(x, y - 1, z, lightLevel, source);
+			calculateLightRecursivePoint(x, y + 1, z, lightLevel, source);
+			calculateLightRecursivePoint(x, y, z - 1, lightLevel, source);
+			calculateLightRecursivePoint(x, y, z + 1, lightLevel, source);
 		}
 	}
 	
@@ -416,7 +488,7 @@ public class Chunk
 		for(Cube light : toRecalc)
 		{
 				Chunk chunk = parent.getChunk(light.x(), light.z());
-				(chunk == null ? this : chunk).calculateLightSource(light);
+				(chunk == null ? this : chunk).calculateLightRecursiveSource(light);
 		}
 	}
 	

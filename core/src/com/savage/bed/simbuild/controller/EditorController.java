@@ -43,7 +43,7 @@ public class EditorController
 		if(pController.f)
 			tmp.add(0, -1, 0);
 		
-		camera.translate(tmp.scl(3 * delta * (pController.e ? 3 : 1)));
+		camera.translate(tmp.scl(3 * delta * (pController.e ? 25 : 1)));
 		camera.update();
 	}
 }

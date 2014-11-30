@@ -47,6 +47,7 @@ public class Inventory
 		wStyle.titleFont = inventorySkin.getFont("debug");
 		
 		property = new TextField("Property of Timothy Bednarzyk and Dylan Savageau", tfStyle);
+		property.setDisabled(true);
 		property.setSize(52, 4);
 		property.setScale(0.5f);
 		property.setPosition(29.5f, 0.1f);
